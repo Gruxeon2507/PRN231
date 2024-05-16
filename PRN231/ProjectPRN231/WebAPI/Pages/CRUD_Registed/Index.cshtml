@@ -1,0 +1,278 @@
+﻿@page
+@model WebAPI.Pages.ManagementGiangVien.IndexModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quản lý đề tài</title>
+    <link rel="stylesheet" href="~/css/DeTai.css">
+</head>
+<body>
+    <header>
+        <h1>Quản lý đề tài</h1>
+        <button id="addTopicBtn" data-toggle="modal" data-target="#addTopicModal">Add đề tài</button>
+    </header>
+    <label for="searchTopic">Tìm kiếm đề tài:</label>
+<input type="text" id="searchTopic" name="searchTopic" placeholder="Nhập tên đề tài...">
+<button id="searchBtn">Tìm kiếm</button>
+    <main>
+        <table id="topicList">
+            <thead>
+                <tr>
+                    <th>ID đề tài</th>
+                    <th>Tên đề tài</th>
+                    <th>Mô tả</th>
+                    <th>Start date</th>
+                    <th>End date</th>
+                    <th>Giảng viên</th>
+                    <th>Sinh viên</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </main>
+
+    <div id="addTopicModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add đề tài</h2>
+            <form id="addTopicForm">
+                <label for="tenDeTai">Tên đề tài:</label>
+                <input type="text" id="tenDeTai" name="tenDeTai" required>
+
+                <label for="moTa">Mô tả:</label>
+                <textarea id="moTa" name="moTa" required></textarea>
+
+                <label for="idGiangVien">ID giảng viên:</label>
+                <input type="text" id="idGiangVien" name="idGiangVien" required>
+
+                <label for="startDate">Start date:</label>
+                <input type="date" id="startDate" name="startDate" required>
+
+                <label for="endDate">End date:</label>
+                <input type="date" id="endDate" name="endDate" required>
+
+                <label for="idSinhVien">ID sinh viên:</label>
+                <input type="text" id="idSinhVien" name="idSinhVien" required>
+
+                <button type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+   <a href="/managementsinhvien" class="btn btn-primary">Trở về trang chính</a>
+
+    <div id="updateTopicModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Update đề tài</h2>
+            <form id="updateTopicForm">
+                <label for="topicName">Tên đề tài:</label
+                <input type="text" id="topicName" name="topicName" required>
+
+                <label for="topicDescription">Mô tả:</label>
+                <textarea id="topicDescription" name="topicDescription" required></textarea>
+
+                <button type="submit">Update</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var idNguoiDung = localStorage.getItem("idNguoiDung");
+
+            function convert(idNguoiDung) {
+                $.ajax({
+                    url: 'https://localhost:7150/api/SinhVien/sinhvien-id/' + idNguoiDung,
+                    type: 'GET',
+                    success: function (response) {
+                        console.log(response);
+                        var idSinhVien = response;
+                        localStorage.setItem('idSinhVien', idSinhVien);
+                        loadTopics(response);
+                    },
+                    error: function (error) {
+                        console.error('Error:', error);
+                    }
+                });
+            }
+
+            function loadTopics(id) {
+                $.ajax({
+                    url: 'https://localhost:7150/api/SinhVien/GetAllDeTaiBySVId/' + id,
+                    type: 'GET',
+                    success: function (topics) {
+                        $('#topicList tbody').empty();
+                        topics.forEach(function (topic) {
+    var row = '<tr>' +
+        '<td>' + topic.idDeTai + '</td>' +
+        '<td>' + topic.tenDeTai + '</td>' +
+        '<td>' + topic.moTa + '</td>' +
+        '<td>' + topic.startDate + '</td>' +
+        '<td>' + topic.endDate + '</td>' +
+        '<td>' + topic.tenGiangVien + '</td>' +
+        '<td>' + topic.tenSinhVien + '</td>' +
+        '<td>' +
+       
+        '<a class="registerBtn" href="/dang-ky-de-tai?idDeTai=' + topic.idDeTai + '">Đăng ký</a>' +
+        '</td>' +
+        '</tr>';
+    $('#topicList tbody').append(row);
+});
+
+
+                        console.log(topics);
+                    },
+                    error: function (error) {
+                        console.error('Lỗi khi tải danh sách đề tài:', error);
+                    }
+                });
+            }
+
+            // Event listener for registering for a topic
+            $(document).on('click', '.registerBtn', function () {
+               event.preventDefault(); 
+
+    var href = $(this).attr('href');
+
+ 
+    var deTaiId = href.substring(href.indexOf('idDeTai=') + 8);
+    var idSinhVien = localStorage.getItem("idSinhVien");
+
+                console.log("DeTaiId:", deTaiId); 
+
+                if (deTaiId) {
+                    var formData = {
+                        IdSinhVien: idSinhVien,
+                        IdDeTai: deTaiId
+                    };
+
+                    $.ajax({
+                        url: 'https://localhost:7150/api/SinhVien/dang-ky-de-tai',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(formData),
+                        success: function (response) {
+                            alert(response);
+                        },
+                        error: function (error) {
+                            console.error('Lỗi khi đăng ký đề tài:', error);
+                        }
+                    });
+                } else {
+                    console.error('Invalid deTaiId:', deTaiId);
+                }
+            });
+
+
+            convert(idNguoiDung);
+            $(document).on('click', '.updateBtn', function () {
+                // Đoạn code sau đây sẽ hiển thị modal cập nhật khi nhấn vào nút "Update"
+                $('#updateTopicModal').css('display', 'block');
+            });
+            
+
+            $(document).on('click', '#addTopicBtn', function () {
+                // Đoạn code sau đây sẽ hiển thị modal thêm đề tài khi nhấn vào nút "Add"
+                $('#addTopicModal').css('display', 'block');
+            });
+
+            $(document).ready(function () {
+                // Bắt sự kiện click của nút "Add"
+                $('#addTopicModal').on('click', 'button[type="submit"]', function (event) {
+                    event.preventDefault(); // Ngăn chặn hành động mặc định của nút "submit" trong form
+
+                    // Lấy dữ liệu từ các trường nhập
+                    var tenDeTai = $('#tenDeTai').val();
+                    var moTa = $('#moTa').val();
+                    var idGiangVien = $('#idGiangVien').val();
+                    var startDate = $('#startDate').val();
+                    var endDate = $('#endDate').val();
+                    var idSinhVien = $('#idSinhVien').val();
+
+                    // Tạo đối tượng dữ liệu để gửi lên máy chủ
+                    var formData = {
+                        TenDeTai: tenDeTai,
+                        MoTa: moTa,
+                        IdGiangVien: idGiangVien,
+                        StartDate: startDate,
+                        EndDate: endDate,
+                        IdSinhVien: idSinhVien
+                    };
+
+                    // Gửi yêu cầu AJAX để thêm đề tài mới
+                    $.ajax({
+                        url: 'https://localhost:7150/api/SinhVien/CreateDeTai',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(formData),
+                        success: function (response) {
+                            // Xử lý phản hồi thành công từ máy chủ
+                            alert('Đã thêm đề tài thành công!');
+                            $('#addTopicModal').hide(); // Ẩn modal sau khi thêm đề tài thành công
+                            loadTopics(localStorage.getItem('idSinhVien')); // Tải lại danh sách đề tài để cập nhật
+                        },
+                        error: function (error) {
+                            // Xử lý lỗi từ máy chủ
+                            console.error('Lỗi khi thêm đề tài:', error);
+                            alert('Đã xảy ra lỗi khi thêm đề tài. Vui lòng thử lại sau.');
+                        }
+                    });
+                });
+            });
+       $(document).ready(function () {
+    // Bắt sự kiện click của nút "Tìm kiếm"
+    $('#searchBtn').click(function () {
+        // Lấy giá trị nhập vào từ trường input
+        var searchValue = $('#searchTopic').val();
+
+        // Gửi yêu cầu AJAX để thực hiện tìm kiếm
+        $.ajax({
+            url: 'https://localhost:7150/api/SinhVien/SearchByName?name=' + searchValue,
+            type: 'GET',
+            success: function (results) {
+                // Xử lý kết quả trả về từ máy chủ
+                // Đoạn mã xử lý kết quả ở đây (ví dụ: hiển thị kết quả trên trang)
+                $('#topicList tbody').empty(); // Xóa nội dung hiện tại của bảng
+                results.forEach(function (topic) {
+                    var row = '<tr>' +
+                        '<td>' + topic.idDeTai + '</td>' +
+                        '<td>' + topic.tenDeTai + '</td>' +
+                        '<td>' + topic.moTa + '</td>' +
+                        '<td>' + topic.startDate + '</td>' +
+                        '<td>' + topic.endDate + '</td>' +
+                        '<td>' + topic.tenGiangVien + '</td>' +
+                        '<td>' + topic.tenSinhVien + '</td>' +
+                        '<td>' +
+                        '<a class="registerBtn" href="/dang-ky-de-tai?idDeTai=' + topic.idDeTai + '">Đăng ký</a>' +
+                        '</td>' +
+                        '</tr>';
+                    $('#topicList tbody').append(row); // Thêm dòng mới vào bảng
+                });
+            },
+            error: function (error) {
+                // Xử lý lỗi nếu có
+                console.error('Lỗi khi thực hiện tìm kiếm:', error);
+                // Hiển thị thông báo lỗi cho người dùng
+                alert('Đã xảy ra lỗi khi tìm kiếm đề tài. Vui lòng thử lại sau.');
+            }
+        });
+    });
+});
+
+
+
+
+            $(document).on('click', '.close', function () {
+                // Đoạn code sau đây sẽ đóng modal khi nhấn vào nút "close"
+                $(this).closest('.modal').css('display', 'none');
+            });
+
+        });
+
+
+    </script>
+</body>
+</html>

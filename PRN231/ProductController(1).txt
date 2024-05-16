@@ -1,0 +1,33 @@
+using Microsoft.AspNetCore.Mvc;
+using NorthWin.Models;
+
+namespace NorthWin.Controllers
+{
+    [ApiController]
+    [Route("api/controler")]
+    public class ProductController : Controller
+    {
+        private readonly NorthwindContext _context;
+        public ProductController(NorthwindContext context)
+        {
+            _context= context;
+        }
+        [HttpGet("GetProduct/{name}")]
+        public IActionResult GetProduct(string name)
+        {
+            var product = _context.Products.Where(x => x.ProductName.ToLower().Contains(name));
+            if(product==null) {
+                return NotFound();
+            }
+            var res = product.Select(x => new ProductDTO
+            {
+                ProductName = x.ProductName,
+                UnitPrice = x.UnitPrice,
+                discString = x.Discontinued ? "Discontinued" : "Continue"
+            }).ToList();
+            return Ok(res);
+        }
+    }
+    
+
+}

@@ -1,0 +1,310 @@
+dotnet tool install --global dotnet-ef
+
+dotnet ef DBcontext scaffold "server =(local); database = ODataASP; uid=sa;pwd=123456;Trusted_Connection=True;Encrypt=False" Microsoft.EntityFrameworkCore.SqlServer -o Models 
+
+dotnet ef migrations add "InitialDB"
+dotnet ef database update
+
+-----------------------------------------------------
+
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "server =(local); database = MovieDB;uid=sa;pwd=123456;Trusted_Connection=True;Encrypt=False"
+  }
+}
+===============================================In Program.cs=================================================================================
+builder.Services.AddCors(opts =>
+{
+opts.AddPolicy("CORSPolicy", builder => builder.AllowAnyHeader().AllowAnyMethod().AllowCredentials().SetIsOriginAllowed((host)=>true));
+});
+app.UseCors("CORSPolicy");
+
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
+
+        // Add services to the container.
+
+        builder.Services.AddControllers(); 
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+        builder.Services.AddCors(opts =>
+        {
+            opts.AddPolicy("CORSPolicy", builder => builder.AllowAnyHeader().AllowAnyMethod().AllowCredentials().SetIsOriginAllowed((host) => true));
+        });
+        builder.Services.AddDbContext<NorthwindContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Services.AddScoped<NorthwindContext>(); // thêm dependence
+        var app = builder.Build();
+
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
+
+        app.UseHttpsRedirection();
+        app.UseCors("CORSPolicy");
+        app.UseAuthorization();
+
+
+        app.MapControllers();
+
+        app.Run();
+    }
+}
+================================================Configure launchsetting ===================================================================
+https://localhost:5000;
+--------------------------------------------------------------------------------------
+var ConnectionString = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetConnectionString("DefaultConnection");
+optionsBuilder.UseSqlServer(ConnectionString);
+----------------------Trong file context--------------
+protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+{
+    if (!optionsBuilder.IsConfigured)
+    {
+        var ConnectionString = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build().GetConnectionString("DefaultConnection");
+        optionsBuilder.UseSqlServer(ConnectionString);
+    }
+    
+}
+--------------------------------------------------------------------------------------
+builder.Services.AddDbContext<MovieDBContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+-----------------------------------------------------------------------------------------------
+public IServiceProvider ServiceProvider { get; set; }
+public IConfiguration Configuration { get; set; }
+protected override void OnStartup(StartupEventArgs e)
+{
+    var serviceColection = new ServiceCollection();
+    serviceColection.AddTransient<GridPanel>();
+    serviceColection.AddScoped<MyStockContext>();
+    ServiceProvider= serviceColection.BuildServiceProvider();
+    ServiceProvider.GetRequiredService<GridPanel>().Show();
+}
+------------------------------------------------------------------------------
+dotnet ef DBcontext scaffold "server =(local);database=Northwind;uid=sa;pwd=123456;Trusted_Connection=True;Encrypt=False" Microsoft.EntityFrameworkCore.SqlServer -o Models 
+
+
+https://github.com/MaterialDesignInXAML/MaterialDesignInXamlToolkit.git
+
+======================================================================
+public Infor GetInfor() {
+    try
+    {
+        return new Infor
+        {
+            Name = txtName.Text,
+            Email = txtEmail.Text,
+            Comment = txtComment.Text,
+        };
+    }
+    catch(Exception e) {
+        MessageBox.Show(e.Message);
+    }
+    return null;
+}
+===========================================================================
+
+private void btnAdd_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var inf = GetInfor();
+            if (inf != null)
+            {
+                _context.Infors.Add(inf);
+                _context.SaveChanges();
+                Load();
+                MessageBox.Show("Insert Infor completed", "Add Infor");
+            }
+        }catch(Exception ex)
+        {
+            MessageBox.Show("Insert Infor Wrong"+ex.Message, "Add Infor");
+        }
+    }
+===========================================================================================
+    private void btnUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var inf = GetInfor();
+            if (inf != null)
+            {
+                var oldInfor= _context.Infors.FirstOrDefault(c=>c.Name==inf.Name);
+                if (oldInfor != null)
+                {
+                    oldInfor.Email = txtEmail.Text;
+                    oldInfor.Comment = txtComment.Text; 
+                    _context.Infors.Update(oldInfor);   
+                    _context.SaveChanges() ;
+                    Load();
+                    MessageBox.Show("Update Infor completed", "Update Infor");
+                }
+                
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Update Infor Wrong" + ex.Message, "Update Infor");
+        }
+    }
+}
+==========================================================================================
+private void BtnDelete_Click(object sender, RoutedEventArgs e)
+{
+    try
+    {
+        var inf = GetInfor();
+        if (inf != null)
+        {
+            var oldInfor = _context.Products.FirstOrDefault(c => c.ProductId == inf.ProductId);
+            if (oldInfor != null)
+            {
+                _context.Products.Remove(oldInfor);
+                _context.SaveChanges();
+                Load();
+                MessageBox.Show("Delete Infor completed", "Delete Infor");
+            }
+
+        }
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show("Delete Product Wrong" + ex.Message, "Delete Product");
+    }
+}
+=================================================================================================
+private void DGVList_Click(object sender, MouseButtonEventArgs e)
+{
+    var aProduct = (sender as DataGrid).SelectedItems;
+    if (aProduct != null)
+    {
+        Models.Product current = (Models.Product)aProduct[0];
+        if(current != null)
+        {
+            var cont = current.Discontinued;
+            if (cont) chkDiscontinue.IsChecked = true;
+            else chkDiscontinue.IsChecked = false;  
+        }
+        
+    }
+}
+
+ASP-WEB-APP-ASP-WEB-APP-ASP-WEB-APP-ASP-WEB-APP-ASP-WEB-APP-ASP-WEB-APP-ASP-WEB-APP-ASP-WEB-APP-ASP-WEB-APP-ASP-WEB-APP-ASP-WEB-APP-ASP-WEB-APP-ASP-WEB-APP-
+=======================================================================================================================
+Điều hướng index tới 1 trang khác
+private static void Main(string[] args)
+{
+    
+    var builder = WebApplication.CreateBuilder(args);
+    builder.Services.AddControllersWithViews();
+
+    var app = builder.Build();
+
+
+    //Routing
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "/{controller=Product}/{action=List}/{id=2}"
+        );
+
+    app.Run();
+}
+/////////////////////////////////////////////////////////////////////////////////////
+Program.cs để thêm Service, Connection String và context
+using DBSchoolWeb.Data;
+using Microsoft.EntityFrameworkCore;
+//using Microsoft.Extensions.DependencyInjection;
+//using RazorPage_2.Data;
+using DBSchoolWeb.Models;
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddRazorPages();
+
+builder.Services.AddDbContext<SchoolContextDbContext>(options =>
+  options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolContext")));
+
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+
+var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+else
+{
+    app.UseDeveloperExceptionPage();
+    app.UseMigrationsEndPoint();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var context = services.GetRequiredService<SchoolContextDbContext>();
+    context.Database.EnsureCreated();
+    //DbInitializer.Initialize(context);
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapRazorPages();
+
+app.Run();
+
+//SingnalR==SingnalR====================================================================
+cai thu vien signalR
+right-click the project, and select Add > Client-Side Library.
+In the Add Client-Side Library dialog:
+Select unpkg for Provider
+Enter @microsoft/signalr@latest for Library.
+Select Choose specific files, expand the dist/browser folder, and select signalr.js and signalr.min.js.
+Set Target Location to wwwroot/js/signalr/.
+Select Install.
+lenh cli---------------------------------------------------------------
+dotnet new webapp -o SignalRChat
+code -r SignalRChat
+Add the SignalR client library-----------------------------------
+dotnet tool uninstall -g Microsoft.Web.LibraryManager.Cli
+dotnet tool install -g Microsoft.Web.LibraryManager.Cli
+Program.cs------------------------------------------------------------------
+using SignalRChat.Hubs;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddRazorPages();
+builder.Services.AddSignalR();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapRazorPages();
+app.MapHub<ChatHub>("/chatHub");
+
+app.Run();

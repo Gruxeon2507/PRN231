@@ -1,0 +1,82 @@
+﻿@page
+@model WebAPI.Pages.Login_Register.RegisterModel
+@{
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Page</title>
+    <link rel="stylesheet" href="~/css/register.css">
+</head>
+<body>
+    <div class="container">
+        <div class="registration-box">
+            <h1>Register</h1>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="inputConfirmPassword">Confirm Password:</label>
+                    <input type="password" id="inputConfirmPassword" required>
+                </div>
+                <button type="submit" class="register-btn">Register</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#registerForm').submit(function (event) {
+                event.preventDefault();
+                var email = $('#email').val();
+                var password = $('#password').val();
+                var username = $('#username').val();
+                var confirmPassword = $('#inputConfirmPassword').val();
+
+                if (password !== confirmPassword) {
+                    alert("Passwords do not match");
+                    return;
+                }
+                var data = {
+                    tenNguoiDung: username,
+                    email: email,
+                    vaiTro: 2,
+                    matKhau: password,   
+                   
+                  
+                };
+
+                $.ajax({
+                    url: 'https://localhost:7150/api/NguoiDung/add-user',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function (response) {
+                        alert("Register Successful");
+                        window.location.href = "/login_register";
+                    },
+                    error: function (xhr, status, error) {
+                        var errorMessage = xhr.responseJSON ? xhr.responseJSON : "Unexpected error occurred";
+                        alert(errorMessage);
+                    }
+                });
+            });
+        });
+    </script>
+
+
+</body>
+</html>

@@ -1,0 +1,120 @@
+﻿@page
+@model WebAPI.Pages.ManagementSinhVien.IndexModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sinh Viên Management Page</title>
+    <link rel="stylesheet" href="/css/GV.css">
+    <link rel="stylesheet" href="/js/GV.js" />
+</head>
+<body>
+    <header>
+        <h1>Instructor Management Page</h1>
+    </header>
+    <a href="/Crud_Registed"><button>List đề tài</button></a>
+    <a href="/Login_Register" class="btn btn-primary">Log out</a>
+    <table id="registedList">
+        <thead>
+            <tr>
+                <th>Registration ID</th>
+                <th>Student Name</th>
+                <th>Project Title</th>
+                <th>Project Description</th>
+                <th>Grade</th>
+                <th>Notes</th>
+                <th>Deadline</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <div id="deadlineModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Deadline Information</h2>
+            <p><strong>Start Date:</strong> <span id="startDate"></span></p>
+            <p><strong>End Date:</strong> <span id="endDate"></span></p>
+            <button id="closeModalBtn">Close</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 Instructor Management System</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var idNguoiDung = localStorage.getItem("idNguoiDung");
+            var registrationId; // Biến registrationId ở phạm vi toàn cục
+
+            function convert(idNguoiDung) {
+                $.ajax({
+                    url: 'https://localhost:7150/api/SinhVien/sinhvien-id/' + idNguoiDung,
+                    type: 'GET',
+                    success: function (response) {
+                        console.log(response);
+                        loadRegisted(response);
+                    },
+                    error: function (error) {
+                        console.error('Error:', error);
+                    }
+                });
+            }
+
+            function loadRegisted(id) {             
+                $.ajax({
+                    url: 'https://localhost:7150/api/SinhVien/RegistrationsByStudent/' +id,
+                    type: 'GET',
+                    success: function (registed) {
+                        $('#registedList tbody').empty();
+                        registed.forEach(function (registed) {
+                            var row = '<tr>' +
+                                '<td>' + registed.idDangKy + '</td>' +
+                                '<td>' + registed.tenSinhVien + '</td>' +
+                                '<td>' + registed.tenDeTai + '</td>' +
+                                '<td>' + registed.moTaDeTai + '</td>' +
+                                '<td>' + registed.diem + '</td>' +
+                                '<td>' + registed.ghiChu + '</td>' +
+                                '<td><button class="viewDeadlineBtn" data-id="' + registed.idDangKy + '">View Deadline</button></td>' +
+                                '</tr>';
+                            $('#registedList tbody').append(row);
+                        });
+                    },
+                    error: function (error) {
+                        console.error('Error:', error);
+                    }
+                });
+            }
+            convert(idNguoiDung);
+
+            $(document).on('click', '.gradeButton', function () {
+                $(this).closest('tr').find('.gradeSection').toggle();
+            });
+
+            // Show deadline modal when View Deadline button is clicked
+            $(document).on('click', '.viewDeadlineBtn', function () {
+                var registrationId = $(this).data('id');
+                $.ajax({
+                    url: 'https://localhost:7150/api/SinhVien/Deadline/' + registrationId,
+                    type: 'GET',
+                    success: function (deadline) {
+                        $('#startDate').text(deadline.startDate);
+                        $('#endDate').text(deadline.endDate);
+                        $('#deadlineModal').show();
+                    },
+                    error: function (error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+            $('.close, #closeModalBtn').click(function () {
+                $('#deadlineModal').hide();
+            });
+       
+        });
+    </script>
+</body>
+</html>
