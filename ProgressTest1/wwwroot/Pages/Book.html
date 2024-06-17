@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Books Management</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Books Management</h2>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <input type="text" id="searchInput" class="form-control mb-2" placeholder="Search by Title or Author Email">
+            </div>
+            <div class="col-md-3">
+                <input type="number" id="minPrice" class="form-control mb-2" placeholder="Min Price">
+            </div>
+            <div class="col-md-3">
+                <input type="number" id="maxPrice" class="form-control mb-2" placeholder="Max Price">
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <button class="btn btn-primary mr-2" onclick="searchBooks()">Search</button>
+                <button class="btn btn-secondary" onclick="clearFilters()">Clear Filters</button>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Publisher Name</th>
+                            <th>Country</th>
+                            <th>Price</th>
+                            <th>Author</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booksList">
+                        <!-- Populate books dynamically using Ajax -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and additional scripts -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Function to search books based on filters
+        function searchBooks() {
+            var searchInput = $('#searchInput').val();
+            var minPrice = $('#minPrice').val();
+            var maxPrice = $('#maxPrice').val();
+
+            var url = 'https://localhost:7070/api/Books?$filter=contains(Title,' + "'" + searchInput + "'" + ')' + ' or contains(EmailAddress,' + "'" + searchInput + "'" + ')';
+            if (searchInput === '') {
+                url = 'https://localhost:7070/api/Books';
+            }
+            if (minPrice && maxPrice) {
+                if (searchInput !== '') {
+                    url += ' and Price ge ' + minPrice + ' and Price le ' + maxPrice;
+                } else {
+                    url += '?$filter=Price ge ' + minPrice + ' and Price le ' + maxPrice;
+                }
+               
+            }
+
+            $.ajax({
+                url: url,
+                method: 'GET',
+                success: function (response) {
+                    console.log(response,"_________________")
+                    $('#booksList').empty();
+                    response.forEach(function (book) {
+                        var authorFullName = book.firstName + ' ' + book.lastName;
+                        var row = '<tr>' +
+                            '<td>' + book.title + '</td>' +
+                            '<td>' + book.publisherName + '</td>' +
+                            '<td>' + book.country + '</td>' +
+                            '<td>' + book.price + '</td>' +
+                            '<td>' + authorFullName + '</td>' +
+                            '<td>' + book.emailAddress + '</td>' +
+                            '</tr>';
+                        $('#booksList').append(row);
+                    });
+                },
+                error: function (error) {
+                    console.log('Error fetching books:', error);
+                }
+            });
+        }
+
+        // Function to clear filters and refresh the list
+        function clearFilters() {
+            $('#searchInput').val('');
+            $('#minPrice').val('');
+            $('#maxPrice').val('');
+            searchBooks();
+        }
+
+        // Initial load of books (optional)
+        $(document).ready(function () {
+            searchBooks();
+        });
+    </script>
+</body>
+</html>
