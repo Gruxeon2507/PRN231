@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directors</title>
+    <link rel="stylesheet" href="./lib/bootstrap/css/bootstrap.min.css">
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>Search Directors</h1>
+        <div class="d-flex w-75 mt-3">
+            <input type="text" id="nationality" placeholder="Nationality" class="form-control me-1">
+            <input type="text" id="gender" placeholder="Gender" class="form-control me-1">
+            <button class="btn btn-outline-secondary" id="searchBtn">Search</button>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-8" id="table-common">
+
+            </div>
+            <div class="col-md-4" id="table-detail">
+
+            </div>
+        </div>
+    </div>
+
+    <script src="./lib/jquery/jquery.min.js"></script>
+    <script>
+        $(document).ready(() => {
+            $('#searchBtn').click(() => {
+                let gender = $('#gender').val().trim();
+                let nationality = $('#nationality').val().trim();
+
+                if (!gender || !nationality) {
+                    alert("Both gender and nationality are required.");
+                    return;
+                }
+
+                let query = `https://localhost:7273/api/Director/GetDirectors/${nationality}/${gender}`;
+
+                $.ajax({
+                    url: query,
+                    method: 'GET',
+                    contentType: 'application/json',
+                    success: (data) => {
+                        $('#table-common').html('');
+                        if (data) {
+                            console.log(data);
+                            $('#table-common').html(generateHtmlDirectorTable(data));
+                        }
+                    },
+                    error: (data) => {
+                        alert("ERROR");
+                    }
+                })
+            })
+            const generateHtmlDirectorTable = (data) => {
+                let tableContent = `
+                            <table class="table table-bordered table-striped">
+                               <thead>
+                                    <tr>
+                                        <th>DirectorId</th>
+                                        <th>Fullname</th>
+                                        <th>Gender</th>
+                                        <th>Dob</th>
+                                        <th>Description</th>
+                                        <th>Nationality</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table">
+                                    {0}
+                                </tbody>
+                            </table>
+                        `;
+                let tableData = '';
+                data.forEach(e => {
+                    tableData += `
+                                <tr>
+                                    <td>${e.id}</td>
+                                    <td>${e.fullName}</td>
+                                    <td>${e.gender}</td>
+                                    <td>${e.dobString}</td>
+                                    <td>${e.description}</td>
+                                    <td>${e.nationality}</td>
+                                    <td><a href="javascript:void(0)" data-id="${e.id}" class="viewDetail">Detail</a></td>
+                                </tr>
+                                `;
+                });
+                tableContent = tableContent.replace("{0}", tableData);
+                return tableContent;
+            }
+
+        })
+        $(document).on('click', '.viewDetail', function () {
+            let id = $(this).attr('data-id');
+            $.ajax({
+                url: `https://localhost:7273/api/Director/GetDirectors/${id}`,
+                method: 'GET',
+                contentType: 'application/json',
+                success: (data) => {
+                    $('#table-detail').html('');
+                    if (data) {
+                        console.log(data);
+                        $('#table-detail').html(generateHtmlDirectorDetail(data));
+                    }
+                },
+                error: (data) => {
+                    alert("ERROR");
+                }
+            })
+        })
+        const generateHtmlDirectorDetail = (data) => {
+            return `
+                        <h3>List movies of ${data.fullName}</h3>
+                        <ul>
+                            ${data.movies.map(x => `<li>${x.title} - Release Year: ${x.releaseYear}</li>`).join('')}
+                        </ul>
+                            `;
+        }
+
+    </script>
+</body>
+
+</html>
