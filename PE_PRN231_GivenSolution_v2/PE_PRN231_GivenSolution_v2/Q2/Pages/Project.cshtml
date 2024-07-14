@@ -1,0 +1,71 @@
+﻿@page
+@model Q2.Pages.ProjectModel
+@{
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project List and Form</title>
+</head>
+<body>
+    <h1>Project List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ProjectId</th>
+                <th>ProjectName</th>
+                <th>ProjectDescription</th>
+                <th>StartDate</th>
+                <th>EndDate</th>
+                <th>IsActive</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var project in Model.Projects)
+            {
+                <tr>
+                    <td>@project.ProjectId</td>
+                    <td>@project.ProjectName</td>
+                    <td>@project.ProjectDescription</td>
+                    <td>@project.StartDate.ToString("yyyy-MM-dd")</td>
+                    <td>@project.EndDate?.ToString("yyyy-MM-dd")</td>
+                    <td>@project.IsActive</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h2>Add New Project</h2>
+    <form method="post">
+        <div>
+            <label for="ProjectId">Project Id:</label>
+            <input type="number" id="ProjectId" asp-for="NewProject.ProjectId" required />
+        </div>
+        <div>
+            <label for="ProjectName">Project Name:</label>
+            <input type="text" id="ProjectName" asp-for="NewProject.ProjectName" required />
+        </div>
+        <div>
+            <label for="ProjectDescription">Project Description:</label>
+            <input type="text" id="ProjectDescription" asp-for="NewProject.ProjectDescription" required />
+        </div>
+        <div>
+            <label for="StartDate">Start Date:</label>
+            <input type="date" id="StartDate" asp-for="NewProject.StartDate" required />
+        </div>
+        <div>
+            <label for="EndDate">End Date:</label>
+            <input type="date" id="EndDate" asp-for="NewProject.EndDate" />
+        </div>
+        <div>
+            <label for="IsActive">Is Active:</label>
+            <input type="checkbox" id="IsActive" asp-for="NewProject.IsActive" />
+        </div>
+        <div>
+            <button type="submit">Add Project</button>
+        </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,111 @@
+﻿@page
+@model Q2.Pages.EmployeeAjaxModel
+@{
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee List and Form (AJAX)</title>
+    
+</head>
+<body>
+    <h1>Employee List</h1>
+    <table id="employeeTable">
+        <thead>
+            <tr>
+                <th>EmployeeId</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Date of Birth</th>
+                <th>Position</th>
+                <th>Is Fulltime</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h2>Add New Employee</h2>
+    <form id="employeeForm">
+        <div>
+            <label for="EmployeeId">Employee Id:</label>
+            <input type="number" id="EmployeeId" name="EmployeeId" required />
+        </div>
+        <div>
+            <label for="Name">Name:</label>
+            <input type="text" id="Name" name="Name" required />
+        </div>
+        <div>
+            <label for="Gender">Gender:</label>
+            <input type="text" id="Gender" name="Gender" required />
+        </div>
+        <div>
+            <label for="Dob">Date of Birth:</label>
+            <input type="date" id="Dob" name="Dob" />
+        </div>
+        <div>
+            <label for="Position">Position:</label>
+            <input type="text" id="Position" name="Position" />
+        </div>
+        <div>
+            <label for="IsFulltime">Is Fulltime:</label>
+            <input type="checkbox" id="IsFulltime" name="IsFulltime" />
+        </div>
+        <div>
+            <button type="submit">Add Employee</button>
+        </div>
+    </form>
+</body>
+</html>
+
+<script src="~/lib/jquery/jquery.js"></script>
+<script>
+    $(document).ready(function () {
+        // Fetch employees
+        $.get("http://localhost:5100/api/Employee", function (data) {
+            var employeeTableBody = $("#employeeTable tbody");
+            employeeTableBody.empty();
+            $.each(data, function (index, employee) {
+                var row = $("<tr></tr>");
+                row.append($("<td></td>").text(employee.EmployeeId));
+                row.append($("<td></td>").text(employee.Name));
+                row.append($("<td></td>").text(employee.Gender));
+                row.append($("<td></td>").text(employee.Dob ? new Date(employee.Dob).toISOString().split('T')[0] : ""));
+                row.append($("<td></td>").text(employee.Position));
+                row.append($("<td></td>").text(employee.IsFulltime));
+                employeeTableBody.append(row);
+            });
+        });
+
+        // Add new employee
+        $("#employeeForm").submit(function (event) {
+            event.preventDefault();
+
+            var formData = {
+                EmployeeId: $("#EmployeeId").val(),
+                Name: $("#Name").val(),
+                Gender: $("#Gender").val(),
+                Dob: $("#Dob").val(),
+                Position: $("#Position").val(),
+                IsFulltime: $("#IsFulltime").is(":checked")
+            };
+
+            $.ajax({
+                url: "http://localhost:5100/api/Employee",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(formData),
+                success: function () {
+                    alert("Employee added successfully!");
+                    location.reload();
+                },
+                error: function () {
+                    alert("Error adding employee.");
+                }
+            });
+        });
+    });
+
+</script>

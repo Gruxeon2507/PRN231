@@ -1,0 +1,73 @@
+﻿@page
+@model Q2.Pages.EmployeeModel
+@{
+    ViewData["Title"] = "Employee List";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee List and Form</title>
+</head>
+<body>
+    <h1>Employee List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>EmployeeId</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Date of Birth</th>
+                <th>Position</th>
+                <th>Is Fulltime</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in Model.Employees)
+            {
+                <tr>
+                    <td>@employee.EmployeeId</td>
+                    <td>@employee.Name</td>
+                    <td>@employee.Gender</td>
+                    <td>@employee.Dob?.ToString("yyyy-MM-dd")</td>
+                    <td>@employee.Position</td>
+                    <td>@employee.IsFulltime</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h2>Add New Employee</h2>
+    <form method="post">
+        <div>
+            <label for="EmployeeId">Employee Id:</label>
+            <input type="number" id="EmployeeId" asp-for="NewEmployee.EmployeeId" required />
+        </div>
+        <div>
+            <label for="Name">Name:</label>
+            <input type="text" id="Name" asp-for="NewEmployee.Name" required />
+        </div>
+        <div>
+            <label for="Gender">Gender:</label>
+            <input type="text" id="Gender" asp-for="NewEmployee.Gender" required />
+        </div>
+        <div>
+            <label for="Dob">Date of Birth:</label>
+            <input type="date" id="Dob" asp-for="NewEmployee.Dob" />
+        </div>
+        <div>
+            <label for="Position">Position:</label>
+            <input type="text" id="Position" asp-for="NewEmployee.Position" />
+        </div>
+        <div>
+            <label for="IsFulltime">Is Fulltime:</label>
+            <input type="checkbox" id="IsFulltime" asp-for="NewEmployee.IsFulltime" />
+        </div>
+        <div>
+            <button type="submit">Add Employee</button>
+        </div>
+    </form>
+</body>
+</html>

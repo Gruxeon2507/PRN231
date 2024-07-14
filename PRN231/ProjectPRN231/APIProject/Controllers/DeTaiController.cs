@@ -9,6 +9,7 @@ namespace APIProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DeTaiController : ControllerBase
     {
         public readonly QLDTContext _context;
